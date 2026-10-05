@@ -1,0 +1,17 @@
+{
+    "name": "XZYOS (小璋瑜OS)",
+    "description": "Cardputer ADV 掌上双屏终端: SSH远程登录(VT100中文终端) + MP3播放 + 农历时钟(四柱八字五行宜忌). Made by Tim",
+    "keywords": "Cardputer, ESP32-S3, SSH, terminal, MP3, lunar, chinese, almanac",
+    "author": "Tim",
+    "firmware_category": [
+        {
+            "默认": {
+                "path": "firmware",
+                "device": ["CardputerADV"],
+                "default_baud": 460800
+            }
+        }
+    ],
+    "version": "0.6.0",
+    "framework": "ESP-IDF"
+}
