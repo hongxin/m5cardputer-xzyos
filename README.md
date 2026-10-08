@@ -1,7 +1,7 @@
 # XZYOS · 小璋瑜OS
 
 > **Made by Tim** · v0.6.0
-> Cardputer ADV 掌上双屏终端：SSH 远程登录 + VT100 中文终端 + MP3 播放器 + 农历时钟
+> A pocket dual-screen SSH terminal + MP3 player + lunar almanac clock for Cardputer ADV
 
 ![SSH Terminal](screenshots/ssh-terminal.jpg)
 ![Lunar Almanac](screenshots/almanac.jpg)
@@ -10,42 +10,51 @@
 ![Clock + Date](screenshots/clock-date.jpg)
 ![Dual Screen](screenshots/dual-screen.jpg)
 
-## 功能
+## What It Does
 
-| 模块 | 内容 |
+### SSH Terminal (the main feature)
+- **Full SSH2 client** built from scratch — curve25519 KEX, AES128-CTR, HMAC-SHA2-256, password auth
+- Runs on an **external 320×240 ILI9341 SPI display** — 40×15 VT100 terminal with ANSI 16-color, blinking cursor
+- **Chinese text support** (GB2312 Level 1+2 bitmap font, 6,886 glyphs)
+- Tested against **OpenSSH 10.3 / zsh / vim / htop** — full-screen TUI apps work
+- Config stored in NVS (host, port, user, password)
+- Long-press key repeat (hold backspace to delete, hold arrows to move in vim)
+- Flow control window management
+
+### MP3 Player
+- SD card playback via esp-audio-dec hardware decode
+- Dual-screen: inner 240×135 shows controls, external 320×240 shows Braun-style visualization (clock + spectrum + track name)
+- Resume from last position, long-press seek, software volume with perceptual curve
+
+### Lunar Clock (3 modes, Tab to switch)
+| Mode | Content |
 |---|---|
-| **SSH 终端** | 完整 SSH2 客户端（自实现协议栈，curve25519 + AES128-CTR + HMAC-SHA2-256） |
-| | 外接 320×240 ILI9341 大屏 40×15 VT100 终端（16 色 ANSI + 中文点阵 + 光标闪烁） |
-| | 密码认证 · NVS 持久化配置 · 流控窗口 · 长按连发（退格连删 / 方向键连移） |
-| | 实测兼容 OpenSSH 10.3 / zsh / vim / htop 等全屏字符应用 |
-| **音乐播放** | SD 卡 MP3 播放（esp-audio-dec 硬件解码） |
-| | 双屏可视化：内屏播放控制 · 外屏 Braun 风格大时钟 + 频谱 + 曲名 |
-| | 续播记忆 · 长按快进快退 · 软件音量（二次方曲线 + 过载增益） |
-| **时钟** | 内屏 DSEG7 LED 时钟 · 外屏三模式 Tab 切换 |
-| | 模式 1：大号 DSEG7 时分 + 冒号秒级闪变 |
-| | 模式 2：LED 数字日期 + 星期 + 农历干支年月日 |
-| | 模式 3：黄历（农历 · 四柱八字 · 五行 · 建除宜忌 · 幸运着装色 T 恤图标） |
-| **设置** | Wi-Fi 连接（NVS 持久化）· SNTP 网络对时 · 系统信息 |
+| 1 | Large DSEG7 LED clock with blinking colon |
+| 2 | Date + weekday + Chinese lunar calendar (干支 year, lunar month/day) |
+| 3 | Full almanac: four pillars (八字), five elements (五行), daily auspicious/inauspicious activities (宜忌), lucky clothing colors |
 
-## 硬件
+All lunar calculations verified against the [`cnlunar`](https://pypi.org/project/cnlunar/) Python library across 2,150 test dates.
 
-- **Cardputer ADV**（ESP32-S3 · 8MB Flash · 无 PSRAM）
-- 内屏 240×135 IPS（M5GFX）
-- 外接 320×240 ILI9341 SPI 大屏（Prokuon Cap TFT V2 接线）
-- TCA8418 键盘（4×14 矩阵 + Fn/Ctrl/Opt/Alt/Shift 修饰键）
-- microSD 卡槽（SPI 共享总线）
-- ES8311 codec + 扬声器
+### Settings
+- Wi-Fi connection (NVS persistent) · SNTP time sync · System info
 
-## 安装
+## Hardware
 
-### 方式一：esptool 手动烧录
+- **Cardputer ADV** (ESP32-S3, 8MB Flash, no PSRAM)
+- External **ILI9341 320×240 SPI display** (via Prokuon Cap TFT V2 adapter, shares bus with SD card)
+- TCA8418 keyboard (4×14 matrix + Fn/Ctrl/Opt/Alt/Shift modifiers)
+- microSD card slot
+- ES8311 codec + speaker
+
+## Install
+
+### Flash with esptool
 
 ```bash
-# 替换 PORT 为你的串口 (macOS: /dev/cu.usbmodem-*, Windows: COMx)
 ./flash.sh /dev/cu.usbmodem-XXXXX
 ```
 
-或直接使用 esptool：
+Or directly:
 
 ```bash
 esptool.py --chip esp32s3 -p PORT -b 460800 write_flash \
@@ -54,45 +63,30 @@ esptool.py --chip esp32s3 -p PORT -b 460800 write_flash \
   0x10000  firmware/xzyos_0x10000.bin
 ```
 
-> 文件名即烧录地址（`名字_地址.bin`），三个文件缺一不可。
+> Filenames indicate flash addresses (`name_address.bin`). All three files are required.
 
-## 使用
+## Keyboard Reference
 
-| 操作 | 动作 |
+| Input | Action |
 |---|---|
-| Launcher 左右键 | 选择应用 · Enter 进入 |
-| **SSH 终端** | |
-| Enter（配置页） | 字段间跳转 / 连接 |
-| `,` `.` `/` `;` | 直接输入标点（输 IP/网址无需修饰） |
-| Fn + `,` `.` `/` `;` | 方向键 ←↓→↑ |
-| Ctrl + 字母 | 控制字符（Ctrl+C 等） |
-| Esc | 发送 ESC · 长按 600ms 退出应用 |
-| **音乐** | |
-| Enter | 播放 / 暂停 |
-| `[` `]` | 上一首 / 下一首 |
-| 长按 `[` `]` | 快退 / 快进（Shift 加速） |
-| `-` `=` | 音量 −/＋ |
-| **时钟** | |
-| Tab | 外屏三模式循环（时钟 / 日期 / 黄历） |
-| **通用** | |
-| Esc | 返回 Launcher |
+| `,` `.` `/` `;` (no modifier) | Type punctuation directly — IPs and URLs work without any modifier |
+| `Fn` + `,` `.` `/` `;` | Arrow keys ←↓→↑ |
+| `Ctrl` + letter | Control characters (Ctrl+C, etc.) |
+| `Shift` | Uppercase / symbols |
+| `Alt` + key | ESC prefix (Meta) |
+| `Esc` (short) | Send ESC to remote |
+| `Esc` (hold 600ms) | Exit to launcher |
+| `Enter` | Confirm / next field / play-pause |
+| `Tab` (in Clock) | Switch external display mode |
 
-## 键盘布局（Cardputer 标准）
+## Version
 
-| 修饰键 | 效果 |
+| Version | Notes |
 |---|---|
-| 无修饰 | `,` `.` `/` `;` 直接输入标点 |
-| Fn + 方向位键 | ←↓→↑ |
-| Shift | 大写 / 符号 |
-| Ctrl + 字母 | 控制字符 |
-| Alt + 键 | ESC 前缀（Meta） |
-
-## 版本
-
-| 版本 | 说明 |
-|---|---|
-| 0.6.0 | 首个公开发布：SSH 终端 + MP3 播放 + 农历时钟 + Wi-Fi 设置 |
+| 0.6.0 | Initial public release: SSH terminal + MP3 player + lunar clock + Wi-Fi settings |
 
 ---
 
 **XZYOS · 小璋瑜OS** · Made by Tim · 0.6.0
+
+[中文说明](README_CN.md)
