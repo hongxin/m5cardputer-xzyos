@@ -3,6 +3,13 @@
 > **Made by Tim** · v0.6.0
 > Cardputer ADV 掌上双屏终端：SSH 远程登录 + VT100 中文终端 + MP3 播放器 + 农历时钟
 
+![SSH Terminal](screenshots/ssh-terminal.jpg)
+![Lunar Almanac](screenshots/almanac.jpg)
+![Music Player](screenshots/music-player.jpg)
+![Launcher](screenshots/launcher.jpg)
+![Clock + Date](screenshots/clock-date.jpg)
+![Dual Screen](screenshots/dual-screen.jpg)
+
 ## 功能
 
 | 模块 | 内容 |
